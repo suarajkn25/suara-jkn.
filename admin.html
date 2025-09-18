@@ -1,182 +1,159 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - Data Keluhan</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 16px; }
-    table { margin-top: 20px; border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
-    th { background: #f4f4f4; }
-    .filter-box { margin-bottom: 20px; }
-    .chart-box { width: 600px; max-width: 100%; margin-bottom: 20px; }
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-    .header img { height: 70px; }
-    .header h2 { flex-grow: 1; text-align: center; margin: 0; }
-    button { padding: 4px 8px; }
-    select { padding: 4px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Data Keluhan</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; padding:16px; }
+  table { margin-top:20px; border-collapse:collapse; width:100%; }
+  th, td { border:1px solid #ddd; padding:6px; text-align:left; }
+  th { background:#f4f4f4; }
+  .filter-box { margin-bottom:20px; }
+  .chart-box { width:600px; max-width:100%; margin-bottom:20px; }
+  .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .header img { height:70px; }
+  .header h2 { flex-grow:1; text-align:center; margin:0; }
+  button { padding:4px 8px; cursor:pointer; }
+  select { padding:4px; }
+</style>
 </head>
 <body>
-  <!-- Header -->
-  <div class="header">
-    <img src="pemprov.png" alt="Logo Pemprov">
-    <h2>Daftar Keluhan Suara JKN</h2>
-    <img src="sj.png" alt="Logo SJKN">
-  </div>
 
-  <!-- Filter & Grafik -->
-  <div class="filter-box">
-    <label for="filterKlasifikasi">Filter Klasifikasi:</label>
-    <select id="filterKlasifikasi">
-      <option value="all">Semua</option>
-      <option value="Layanan">Layanan</option>
-      <option value="Administrasi">Administrasi</option>
-      <option value="Fasilitas">Fasilitas</option>
-      <option value="Lainnya">Lainnya</option>
-    </select>
-  </div>
+<div class="header">
+  <img src="pemprov.png" alt="Logo Pemprov">
+  <h2>Daftar Keluhan Suara JKN</h2>
+  <img src="sj.png" alt="Logo SJKN">
+</div>
 
-  <div class="chart-box">
-    <canvas id="chartKeluhan"></canvas>
-  </div>
+<div class="filter-box">
+  <label for="filterKlasifikasi">Filter Klasifikasi:</label>
+  <select id="filterKlasifikasi">
+    <option value="all">Semua</option>
+    <option value="Layanan">Layanan</option>
+    <option value="Administrasi">Administrasi</option>
+    <option value="Fasilitas">Fasilitas</option>
+    <option value="Lainnya">Lainnya</option>
+  </select>
+</div>
 
-  <!-- Tabel keluhan -->
-  <table>
-    <thead>
-      <tr>
-        <th>Nama</th>
-        <th>No HP</th>
-        <th>Jenis Kelamin</th>
-        <th>Puskesmas</th>
-        <th>Tujuan</th>
-        <th>Keluhan</th>
-        <th>Klasifikasi</th>
-        <th>Status</th>
-        <th>Tiket</th>
-        <th>Bukti</th>
-        <th>Aksi</th>
-      </tr>
-    </thead>
-    <tbody id="keluhanTable"></tbody>
-  </table>
+<div class="chart-box">
+  <canvas id="chartKeluhan"></canvas>
+</div>
 
-  <script>
-    // Ganti dengan kredensial Supabase lo
-    const SUPABASE_URL = "https://gvfidfyrzrjxxmsdgxmw.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2ZmlkZnlyenJqeHhtc2RneG13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxNjg4MDcsImV4cCI6MjA3Mzc0NDgwN30.oCb9nThuh5X_J3Ds8HL-rOIQ_siq_whqjDTjA3eJhos";
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<table>
+  <thead>
+    <tr>
+      <th>Nama</th>
+      <th>No HP</th>
+      <th>Jenis Kelamin</th>
+      <th>Puskesmas</th>
+      <th>Tujuan</th>
+      <th>Keluhan</th>
+      <th>Klasifikasi</th>
+      <th>Status</th>
+      <th>Tiket</th>
+      <th>Bukti</th>
+      <th>Aksi</th>
+    </tr>
+  </thead>
+  <tbody id="keluhanTable"></tbody>
+</table>
 
-    let chart;
-    let allData = [];
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-    async function loadKeluhan() {
-      const { data, error } = await supabase
-        .from("keluhan")
-        .select("*")
-        .order("created_at", { ascending: false });
+  // Ganti dengan kredensial Supabase lo
+  const SUPABASE_URL = "https://gvfidfyrzrjxxmsdgxmw.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2ZmlkZnlyenJqeHhtc2RneG13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxNjg4MDcsImV4cCI6MjA3Mzc0NDgwN30.oCb9nThuh5X_J3Ds8HL-rOIQ_siq_whqjDTjA3eJhos";
 
-      if (error) {
-        console.error(error);
-        return;
-      }
-      allData = data;
-      renderTable(data);
-      renderChart(data);
-    }
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    function renderTable(data) {
-      const tbody = document.getElementById("keluhanTable");
-      tbody.innerHTML = "";
+  let chart;
+  let allData = [];
 
-      data.forEach(k => {
-        const tr = document.createElement("tr");
-        const buktiCell = k.bukti 
-          ? `<a href="${k.bukti}" target="_blank">Lihat</a>` 
-          : "Tidak ada";
+  async function loadKeluhan() {
+    const { data, error } = await supabase
+      .from("keluhan")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-        tr.innerHTML = `
-          <td>${k.nama}</td>
-          <td>${k.nohp}</td>
-          <td>${k.jenisKelamin}</td>
-          <td>${k.lokasiPuskesmas}</td>
-          <td>${k.tujuanKeluhan}</td>
-          <td>${k.keluhan}</td>
-          <td>${k.klasifikasi} ${k.klasifikasiLainnya || ""}</td>
-          <td>
-            <select onchange="updateStatus('${k.id}', this.value)">
-              <option value="menunggu" ${k.status === 'menunggu' ? 'selected' : ''}>Menunggu</option>
-              <option value="proses" ${k.status === 'proses' ? 'selected' : ''}>Proses</option>
-              <option value="selesai" ${k.status === 'selesai' ? 'selected' : ''}>Selesai</option>
-            </select>
-          </td>
-          <td>${k.ticket}</td>
-          <td>${buktiCell}</td>
-          <td><button onclick="hapusKeluhan('${k.id}')">Hapus</button></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
+    if (error) { console.error(error); return; }
+    allData = data;
+    renderTable(data);
+    renderChart(data);
+  }
 
-    function renderChart(data) {
-      const counts = { Layanan:0, Administrasi:0, Fasilitas:0, Lainnya:0 };
-      data.forEach(k => {
-        if (counts[k.klasifikasi] !== undefined) {
-          counts[k.klasifikasi]++;
-        } else {
-          counts["Lainnya"]++;
-        }
-      });
+  function renderTable(data) {
+    const tbody = document.getElementById("keluhanTable");
+    tbody.innerHTML = "";
 
-      const labels = Object.keys(counts);
-      const values = Object.values(counts);
+    data.forEach(k => {
+      const buktiCell = k.bukti ? `<a href="${k.bukti}" target="_blank">Lihat</a>` : "Tidak ada";
 
-      const ctx = document.getElementById("chartKeluhan").getContext("2d");
-      if (chart) chart.destroy();
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${k.nama}</td>
+        <td>${k.nohp}</td>
+        <td>${k.jenisKelamin}</td>
+        <td>${k.lokasiPuskesmas}</td>
+        <td>${k.tujuanKeluhan}</td>
+        <td>${k.keluhan}</td>
+        <td>${k.klasifikasi} ${k.klasifikasiLainnya || ""}</td>
+        <td>
+          <select onchange="updateStatus('${k.id}', this.value)">
+            <option value="menunggu" ${k.status==='menunggu'?'selected':''}>Menunggu</option>
+            <option value="proses" ${k.status==='proses'?'selected':''}>Proses</option>
+            <option value="selesai" ${k.status==='selesai'?'selected':''}>Selesai</option>
+          </select>
+        </td>
+        <td>${k.ticket}</td>
+        <td>${buktiCell}</td>
+        <td><button onclick="hapusKeluhan('${k.id}')">Hapus</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
 
-      chart = new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels: labels,
-          datasets: [{
-            label: "Jumlah Keluhan",
-            data: values,
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: { y: { beginAtZero: true, stepSize: 1 } }
-        }
-      });
-    }
-
-    async function updateStatus(id, status) {
-      await supabase.from("keluhan").update({ status }).eq("id", id);
-      loadKeluhan();
-    }
-
-    async function hapusKeluhan(id) {
-      await supabase.from("keluhan").delete().eq("id", id);
-      loadKeluhan();
-    }
-
-    document.getElementById("filterKlasifikasi").addEventListener("change", function() {
-      const value = this.value;
-      if (value === "all") {
-        renderTable(allData);
-        renderChart(allData);
-      } else {
-        const filtered = allData.filter(k => k.klasifikasi === value);
-        renderTable(filtered);
-        renderChart(filtered);
-      }
+  function renderChart(data) {
+    const counts = { Layanan:0, Administrasi:0, Fasilitas:0, Lainnya:0 };
+    data.forEach(k => {
+      if (counts[k.klasifikasi]!==undefined) counts[k.klasifikasi]++;
+      else counts["Lainnya"]++;
     });
 
+    const labels = Object.keys(counts);
+    const values = Object.values(counts);
+
+    const ctx = document.getElementById("chartKeluhan").getContext("2d");
+    if (chart) chart.destroy();
+
+    chart = new Chart(ctx, {
+      type: "bar",
+      data: { labels, datasets:[{ label:"Jumlah Keluhan", data:values, borderWidth:1 }] },
+      options: { responsive:true, scales:{ y:{ beginAtZero:true, stepSize:1 } } }
+    });
+  }
+
+  window.updateStatus = async (id, status) => {
+    await supabase.from("keluhan").update({status}).eq("id", id);
     loadKeluhan();
-  </script>
+  }
+
+  window.hapusKeluhan = async (id) => {
+    await supabase.from("keluhan").delete().eq("id", id);
+    loadKeluhan();
+  }
+
+  document.getElementById("filterKlasifikasi").addEventListener("change", function() {
+    const value = this.value;
+    if (value==="all") { renderTable(allData); renderChart(allData); }
+    else { const filtered = allData.filter(k=>k.klasifikasi===value); renderTable(filtered); renderChart(filtered); }
+  });
+
+  loadKeluhan();
+</script>
+
 </body>
 </html>

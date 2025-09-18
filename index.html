@@ -73,7 +73,6 @@ footer { margin-top:auto; padding:15px 0; font-size:0.85rem; color:#555; width:1
       <option value="Layanan">Layanan</option>
       <option value="Administrasi">Administrasi</option>
       <option value="Fasilitas">Fasilitas</option>
-      <option value="Lainnya">Lainnya</option>
     </select>
   </label>
   <label>Keluhan:<textarea name="keluhan" required></textarea></label>
@@ -102,7 +101,7 @@ footer { margin-top:auto; padding:15px 0; font-size:0.85rem; color:#555; width:1
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://gvfidfyrzrjxxmsdgxmw.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2ZmlkZnlyenJqeHhtc2RneG13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxNjg4MDcsImV4cCI6MjA3Mzc0NDgwN30.oCb9nThuh5X_J3Ds8HL-rOIQ_siq_whqjDTjA3eJhos";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2ZmlkZnlyenJqeHhtc2RneG13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxNjg4MDcsImV4cCI6MjA3Mzc0NDgwN30.oCb9nThuh5X_J3Ds8HL-rOIQ_siq_whqjDTjA3eJhos"; // ganti dengan key anon/public kalian
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const form = document.getElementById('keluhanForm');
@@ -116,7 +115,7 @@ form.addEventListener('submit', async e => {
 
   const data = {
     nama: form.nama.value.trim(),
-    nohp: form.nohp.value.trim(),
+    no_hp: form.nohp.value.trim(),
     jenis_kelamin: form.jenisKelamin.value,
     lokasi_puskesmas: form.lokasiPuskesmas.value.trim(),
     tujuan_keluhan: form.tujuanKeluhan.value,
@@ -126,7 +125,7 @@ form.addEventListener('submit', async e => {
 
   // VALIDASI
   if(!data.nama || data.nama.length<3) return showError("Nama minimal 3 huruf!");
-  if(!/^[0-9]{10,13}$/.test(data.nohp)) return showError("No HP harus 10-13 digit!");
+  if(!/^[0-9]{10,13}$/.test(data.no_hp)) return showError("No HP harus 10-13 digit!");
   if(!data.jenis_kelamin) return showError("Pilih jenis kelamin!");
   if(!data.lokasi_puskesmas) return showError("Lokasi wajib diisi!");
   if(!data.tujuan_keluhan) return showError("Pilih tujuan keluhan!");
@@ -138,7 +137,7 @@ form.addEventListener('submit', async e => {
   // Preview
   ticketNumber.textContent = "Nomor Tiket: " + ticket;
   document.getElementById('previewNama').textContent = data.nama;
-  document.getElementById('previewNoHP').textContent = data.nohp;
+  document.getElementById('previewNoHP').textContent = data.no_hp;
   document.getElementById('previewJK').textContent = data.jenis_kelamin;
   document.getElementById('previewPuskesmas').textContent = data.lokasi_puskesmas;
   document.getElementById('previewTujuan').textContent = data.tujuan_keluhan;

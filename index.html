@@ -5,11 +5,66 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Suara JKN - Form Keluhan</title>
 <style>
-/* ... styling sama kayak versi lo (dipertahankan) ... */
+body { font-family: Arial, sans-serif; padding: 16px; }
+input, select, textarea, button { padding: 6px; margin: 4px 0; width: 100%; }
+label { font-weight: bold; }
+#preview { display: none; margin-top: 20px; border: 1px solid #ddd; padding: 10px; }
 </style>
 </head>
 <body>
-<!-- ... header, form, preview, footer sama persis kayak punya lo ... -->
+
+<h2>Form Keluhan Suara JKN</h2>
+
+<form id="keluhanForm">
+  <label>Nama</label>
+  <input type="text" name="nama" required>
+  <label>No HP</label>
+  <input type="text" name="nohp" required>
+  <label>Jenis Kelamin</label>
+  <select name="jenisKelamin" required>
+    <option value="">Pilih</option>
+    <option value="Laki-laki">Laki-laki</option>
+    <option value="Perempuan">Perempuan</option>
+  </select>
+  <label>Lokasi Puskesmas</label>
+  <input type="text" name="lokasiPuskesmas" required>
+  <label>Tujuan Keluhan</label>
+  <select name="tujuanKeluhan" required>
+    <option value="">Pilih</option>
+    <option value="Layanan">Layanan</option>
+    <option value="Administrasi">Administrasi</option>
+    <option value="Fasilitas">Fasilitas</option>
+  </select>
+  <label>Klasifikasi</label>
+  <select name="klasifikasi" required>
+    <option value="">Pilih</option>
+    <option value="Layanan">Layanan</option>
+    <option value="Administrasi">Administrasi</option>
+    <option value="Fasilitas">Fasilitas</option>
+    <option value="Lainnya">Lainnya</option>
+  </select>
+  <label>Klasifikasi Lainnya</label>
+  <input type="text" name="klasifikasiLainnya">
+  <label>Keluhan</label>
+  <textarea name="keluhan" required></textarea>
+  <label>Bukti (opsional)</label>
+  <input type="file" name="bukti">
+  <button type="submit" id="submitBtn">Kirim Keluhan</button>
+</form>
+
+<div id="responseMessage"></div>
+<div id="ticketNumber"></div>
+
+<div id="preview">
+<h3>Preview Keluhan</h3>
+<p>Nama: <span id="previewNama"></span></p>
+<p>No HP: <span id="previewNoHP"></span></p>
+<p>Jenis Kelamin: <span id="previewJK"></span></p>
+<p>Puskesmas: <span id="previewPuskesmas"></span></p>
+<p>Tujuan: <span id="previewTujuan"></span></p>
+<p>Keluhan: <span id="previewKeluhan"></span></p>
+<p>Klasifikasi: <span id="previewKlasifikasi"></span> <span id="previewKlasifikasiLainnya"></span></p>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -19,7 +74,7 @@ const submitBtn=document.getElementById('submitBtn');
 const previewBox=document.getElementById('preview');
 const ticketNumber=document.getElementById('ticketNumber');
 
-// Ganti pakai kredensial lo sendiri dari Supabase
+// Kredensial Supabase
 const SUPABASE_URL = "https://gvfidfyrzrjxxmsdgxmw.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2ZmlkZnlyenJqeHhtc2RneG13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxNjg4MDcsImV4cCI6MjA3Mzc0NDgwN30.oCb9nThuh5X_J3Ds8HL-rOIQ_siq_whqjDTjA3eJhos";
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -38,7 +93,7 @@ form.addEventListener('submit', async e=>{
     klasifikasiLainnya:form.klasifikasiLainnya.value.trim()
   };
 
-  // validasi (tetep sama kayak versi lo)
+  // validasi
   if(!data.nama || data.nama.length<3){return showError("Nama minimal 3 huruf!");}
   if(!/^[0-9]{10,13}$/.test(data.nohp)){return showError("No HP harus 10-13 digit!");}
   if(!data.jenisKelamin){return showError("Pilih jenis kelamin!");}
@@ -50,7 +105,6 @@ form.addEventListener('submit', async e=>{
   const ticket="SJKN-"+Date.now();
   ticketNumber.textContent="Nomor Tiket: "+ticket;
 
-  // tampilkan preview (sama kayak versi lo)
   document.getElementById('previewNama').textContent=data.nama;
   document.getElementById('previewNoHP').textContent=data.nohp;
   document.getElementById('previewJK').textContent=data.jenisKelamin;
@@ -68,27 +122,22 @@ form.addEventListener('submit', async e=>{
   submitBtn.disabled=true;
 
   try {
-    // upload file ke bucket
     if(fileInput){
       const filePath = `${ticket}/${fileInput.name}`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("bukti_keluhan")
         .upload(filePath, fileInput);
-
       if(uploadError) throw uploadError;
 
-      // ambil public URL
       const { data: publicUrlData } = supabase.storage
         .from("bukti_keluhan")
         .getPublicUrl(filePath);
       buktiUrl = publicUrlData.publicUrl;
     }
 
-    // simpan ke tabel keluhan
     const { error: insertError } = await supabase
       .from("keluhan")
       .insert([{ ...data, ticket, bukti: buktiUrl }]);
-
     if(insertError) throw insertError;
 
     alert('Terimakasih, keluhan anda sudah tersimpan. Nomor tiket: '+ticket);

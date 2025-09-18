@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Suara JKN - Form Keluhan</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Old+Standard+TT&display=swap');
+body {
+  font-family:'Old Standard TT', serif;
+  background:#f0f8ff; margin:0; padding:0 0 60px 0;
+  min-height:100vh; display:flex; flex-direction:column;
+  align-items:center; color:#0d47a1;
+}
+.marquee-container {
+  width:100%; overflow:hidden; border:2px solid #0d47a1;
+  border-radius:8px; background:#e3f2fd; max-width:600px;
+  margin:20px auto 10px auto; padding:10px 0; text-align:center;
+}
+.marquee {
+  display:inline-flex; white-space:nowrap;
+  font-size:2rem; font-weight:bold; color:#0d47a1;
+  min-width:200%; animation:marqueeSmooth 20s linear infinite;
+}
+.marquee span { display:inline-block; padding-right:3rem; }
+@keyframes marqueeSmooth { 0% { transform:translateX(0); } 100% { transform:translateX(-50%); } }
+.kepanjangan {
+  font-style:italic; font-size:1.1rem; color:#1565c0;
+  max-width:600px; margin:0 auto 20px auto; text-align:center;
+}
+.header {
+  width:100%; max-width:800px; display:flex; align-items:center;
+  justify-content:space-between; background:#e3f2fd;
+  padding:10px 20px; border-radius:10px;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1); margin-bottom:20px;
+}
+.header img { height:50px; }
+.header-title { font-size:1.5rem; font-weight:bold; color:#0d47a1; text-align:center; }
+.form-container {
+  background:white; padding:30px; border-radius:10px;
+  box-shadow:0 3px 8px rgba(0,0,0,0.1); max-width:600px;
+  width:90%; box-sizing:border-box; text-align:left;
+}
+.form-container label { display:block; margin-bottom:0.5rem; font-weight:bold; }
+input, select, textarea {
+  width:100%; padding:10px; border:1px solid #ccc;
+  border-radius:6px; font-size:1rem; box-sizing:border-box;
+}
+textarea { min-height:120px; resize:vertical; }
+button {
+  background:#0d47a1; color:white; padding:12px; border:none;
+  border-radius:6px; font-weight:bold; cursor:pointer;
+  font-size:1rem; margin-top:10px;
+}
+footer {
+  margin-top:auto; padding:15px 0; font-size:0.85rem; color:#555;
+  width:100%; text-align:center; background:#e3f2fd;
+  position:fixed; bottom:0; left:0;
+  box-shadow:0 -2px 5px rgba(0,0,0,0.1);
+}
+#responseMessage { margin-top:1rem; font-weight:bold; }
+.preview-container {
+  margin-top:20px; padding:15px; border:1px solid #ccc;
+  border-radius:8px; background:#f9f9f9;
+}
+.ticket { font-weight:bold; color:green; margin-bottom:10px; }
+.klasifikasi { font-weight:bold; color:#d32f2f; margin-top:10px; }
+.preview-bukti { margin-top:10px; }
+</style>
+</head>
+<body>
+
+<div class="marquee-container">
+  <div class="marquee"><span>SUARA JKN</span><span>SUARA JKN</span><span>SUARA JKN</span></div>
+</div>
+
+<div class="kepanjangan">
+(<em>Sistem Unggah Aspirasi Respon Aktif</em>)
+</div>
+
+<div class="header">
+  <img src="pemprov.png" alt="Logo Pemprov Sumbar">
+  <div class="header-title">Form Keluhan</div>
+  <img src="sj.png" alt="Logo Suara JKN">
+</div>
+
+<div class="form-container">
+<form id="keluhanForm">
+  <label>Nama:<input type="text" name="nama" required /></label>
+  <label>No HP:<input type="tel" name="nohp" required pattern="[0-9]+" /></label>
+  <label>Jenis Kelamin:
+    <select name="jenisKelamin" required>
+      <option value="" disabled selected>Pilih...</option>
+      <option value="Laki-laki">Laki-laki</option>
+      <option value="Perempuan">Perempuan</option>
+    </select>
+  </label>
+  <label>Lokasi Puskesmas:<input type="text" name="lokasiPuskesmas" required /></label>
+  <label>Tujuan Keluhan:
+    <select name="tujuanKeluhan" required>
+      <option value="" disabled selected>Pilih tujuan...</option>
+      <option value="BPJS">BPJS</option>
+      <option value="Puskesmas">Puskesmas</option>
+    </select>
+  </label>
+  <label>Klasifikasi Keluhan:
+    <select name="klasifikasi" required>
+      <option value="" disabled selected>Pilih klasifikasi...</option>
+      <option value="Layanan">Layanan</option>
+      <option value="Administrasi">Administrasi</option>
+      <option value="Fasilitas">Fasilitas</option>
+      <option value="Lainnya">Lainnya</option>
+    </select>
+  </label>
+  <label>Jika Lainnya, sebutkan:<input type="text" name="klasifikasiLainnya" placeholder="Opsional jika Lainnya" /></label>
+  <label>Keluhan:<textarea name="keluhan" required></textarea></label>
+  <label>Upload Bukti:<input type="file" name="bukti" accept="image/*,application/pdf" /></label>
+  <button type="submit" id="submitBtn">Kirim Keluhan</button>
+</form>
+
+<p id="responseMessage"></p>
+
+<div id="preview" class="preview-container" style="display:none;">
+  <div class="ticket" id="ticketNumber"></div>
+  <h3>Preview Keluhan</h3>
+  <p><strong>Nama:</strong> <span id="previewNama"></span></p>
+  <p><strong>No HP:</strong> <span id="previewNoHP"></span></p>
+  <p><strong>Jenis Kelamin:</strong> <span id="previewJK"></span></p>
+  <p><strong>Lokasi Puskesmas:</strong> <span id="previewPuskesmas"></span></p>
+  <p><strong>Tujuan:</strong> <span id="previewTujuan"></span></p>
+  <p><strong>Keluhan:</strong> <span id="previewKeluhan"></span></p>
+  <p class="klasifikasi">Klasifikasi: <span id="previewKlasifikasi"></span></p>
+  <p><strong>Lainnya:</strong> <span id="previewKlasifikasiLainnya"></span></p>
+  <div class="preview-bukti" id="previewBukti"></div>
+</div>
+</div>
+
+<footer>
+2025 SUARA JKN - Didukung oleh Pemerintah Provinsi Sumatera Barat
+</footer>
+
+<script>
+const form=document.getElementById('keluhanForm');
+const responseMessage=document.getElementById('responseMessage');
+const submitBtn=document.getElementById('submitBtn');
+const previewBox=document.getElementById('preview');
+const ticketNumber=document.getElementById('ticketNumber');
+
+form.addEventListener('submit', async e=>{
+  e.preventDefault();
+
+  const data={
+    nama:form.nama.value.trim(),
+    nohp:form.nohp.value.trim(),
+    jenisKelamin:form.jenisKelamin.value,
+    lokasiPuskesmas:form.lokasiPuskesmas.value.trim(),
+    tujuanKeluhan:form.tujuanKeluhan.value,
+    keluhan:form.keluhan.value.trim(),
+    klasifikasi:form.klasifikasi.value,
+    klasifikasiLainnya:form.klasifikasiLainnya.value.trim()
+  };
+
+  // === VALIDASI ===
+  if(!data.nama || data.nama.length<3){
+    responseMessage.textContent="Nama harus diisi minimal 3 huruf!";
+    responseMessage.style.color="red"; return;
+  }
+  if(!/^[0-9]{10,13}$/.test(data.nohp)){
+    responseMessage.textContent="No HP harus angka (10-13 digit)!";
+    responseMessage.style.color="red"; return;
+  }
+  if(!data.jenisKelamin){
+    responseMessage.textContent="Pilih jenis kelamin!";
+    responseMessage.style.color="red"; return;
+  }
+  if(!data.lokasiPuskesmas){
+    responseMessage.textContent="Lokasi Puskesmas wajib diisi!";
+    responseMessage.style.color="red"; return;
+  }
+  if(!data.tujuanKeluhan){
+    responseMessage.textContent="Pilih tujuan keluhan!";
+    responseMessage.style.color="red"; return;
+  }
+  if(!data.klasifikasi){
+    responseMessage.textContent="Pilih klasifikasi keluhan!";
+    responseMessage.style.color="red"; return;
+  }
+  if(!data.keluhan){
+    responseMessage.textContent="Keluhan wajib diisi!";
+    responseMessage.style.color="red"; return;
+  }
+
+  // === Jika lolos validasi ===
+  const ticket="SJKN-"+Date.now();
+  ticketNumber.textContent="Nomor Tiket: "+ticket;
+
+  document.getElementById('previewNama').textContent=data.nama;
+  document.getElementById('previewNoHP').textContent=data.nohp;
+  document.getElementById('previewJK').textContent=data.jenisKelamin;
+  document.getElementById('previewPuskesmas').textContent=data.lokasiPuskesmas;
+  document.getElementById('previewTujuan').textContent=data.tujuanKeluhan;
+  document.getElementById('previewKeluhan').textContent=data.keluhan;
+  document.getElementById('previewKlasifikasi').textContent=data.klasifikasi;
+  document.getElementById('previewKlasifikasiLainnya').textContent=data.klasifikasiLainnya;
+
+  const fileInput=form.bukti.files[0];
+  const previewBukti=document.getElementById('previewBukti');
+  previewBukti.innerHTML='';
+  if(fileInput){
+    const reader=new FileReader();
+    reader.onload=function(e){
+      if(fileInput.type.startsWith("image/")){
+        const img=document.createElement("img");
+        img.src=e.target.result; img.style.maxWidth="100%";
+        previewBukti.appendChild(img);
+      }else{
+        const link=document.createElement("a");
+        link.href=e.target.result;
+        link.textContent="Lihat bukti ("+fileInput.name+")";
+        link.target="_blank";
+        previewBukti.appendChild(link);
+      }
+    }
+    reader.readAsDataURL(fileInput);
+  }
+
+  previewBox.style.display='block';
+  submitBtn.disabled=true;
+  responseMessage.textContent='Mengirim keluhan...';
+  responseMessage.style.color='blue';
+
+  try{
+    const res=await fetch('http://localhost:3000/keluhan',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({...data,ticket})
+    });
+    const result=await res.json();
+    if(res.ok){
+      alert('Terimakasih, keluhan anda akan segera kami proses. Nomor tiket: '+ticket);
+      responseMessage.textContent='Keluhan berhasil dikirim. Nomor tiket: '+ticket;
+      responseMessage.style.color='green';
+      form.reset();
+    }else{
+      responseMessage.textContent=result.error||'Terjadi kesalahan';
+      responseMessage.style.color='red';
+    }
+  }catch(err){
+    responseMessage.textContent='Gagal menghubungi server';
+    responseMessage.style.color='red';
+  }finally{
+    submitBtn.disabled=false;
+  }
+});
+</script>
+
+</body>
+</html>

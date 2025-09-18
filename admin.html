@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Data Keluhan</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 16px; }
+    table { margin-top: 20px; border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
+    th { background: #f4f4f4; }
+    .filter-box { margin-bottom: 20px; }
+    .chart-box { width: 600px; max-width: 100%; margin-bottom: 20px; }
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .header img { height: 70px; }
+    .header h2 { flex-grow: 1; text-align: center; margin: 0; }
+  </style>
+</head>
+<body>
+  <!-- Header dengan logo -->
+  <div class="header">
+    <img src="pemprov.png" alt="Logo Pemprov">
+    <h2>Daftar Keluhan Suara JKN</h2>
+    <img src="sj.png" alt="Logo SJKN">
+  </div>
+
+  <!-- Filter & Grafik -->
+  <div class="filter-box">
+    <label for="filterKlasifikasi">Filter Klasifikasi:</label>
+    <select id="filterKlasifikasi">
+      <option value="all">Semua</option>
+      <option value="Layanan">Layanan</option>
+      <option value="Administrasi">Administrasi</option>
+      <option value="Fasilitas">Fasilitas</option>
+      <option value="Dampak">Dampak</option>
+    </select>
+  </div>
+
+  <div class="chart-box">
+    <canvas id="chartKeluhan"></canvas>
+  </div>
+
+  <!-- Tabel keluhan -->
+  <table>
+    <thead>
+      <tr>
+        <th>Nama</th>
+        <th>No HP</th>
+        <th>Jenis Kelamin</th>
+        <th>Puskesmas</th>
+        <th>Tujuan</th>
+        <th>Keluhan</th>
+        <th>Klasifikasi</th>
+        <th>Status</th>
+        <th>Tiket</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody id="keluhanTable"></tbody>
+  </table>
+
+  <script>
+    let chart; 
+    let allData = []; 
+
+    async function loadKeluhan() {
+      const res = await fetch('http://localhost:3000/keluhan');
+      const data = await res.json();
+      allData = data;
+
+      renderTable(data);
+      renderChart(data);
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById('keluhanTable');
+      tbody.innerHTML = '';
+
+      data.forEach(k => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${k.nama}</td>
+          <td>${k.nohp}</td>
+          <td>${k.jenisKelamin}</td>
+          <td>${k.lokasiPuskesmas}</td>
+          <td>${k.tujuanKeluhan}</td>
+          <td>${k.keluhan}</td>
+          <td>${k.klasifikasi} ${k.klasifikasiLainnya || ''}</td>
+          <td>
+            <select onchange="updateStatus('${k._id}', this.value)">
+              <option value="menunggu" ${k.status === 'menunggu' ? 'selected' : ''}>Menunggu</option>
+              <option value="proses" ${k.status === 'proses' ? 'selected' : ''}>Proses</option>
+              <option value="selesai" ${k.status === 'selesai' ? 'selected' : ''}>Selesai</option>
+            </select>
+          </td>
+          <td>${k.ticket}</td>
+          <td>
+            <button onclick="hapusKeluhan('${k._id}')">Hapus</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderChart(data) {
+      const counts = { Layanan:0, Administrasi:0, Fasilitas:0, Dampak:0 };
+      data.forEach(k => {
+        if (counts[k.klasifikasi] !== undefined) {
+          counts[k.klasifikasi]++;
+        }
+      });
+
+      const labels = Object.keys(counts);
+      const values = Object.values(counts);
+
+      const ctx = document.getElementById('chartKeluhan').getContext('2d');
+      if (chart) chart.destroy(); 
+
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Jumlah Keluhan',
+            data: values,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true, stepSize: 1 }
+          }
+        }
+      });
+    }
+
+    async function updateStatus(id, status) {
+      await fetch(`http://localhost:3000/keluhan/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      loadKeluhan();
+    }
+
+    async function hapusKeluhan(id) {
+      await fetch(`http://localhost:3000/keluhan/${id}`, { method: 'DELETE' });
+      loadKeluhan();
+    }
+
+    document.getElementById('filterKlasifikasi').addEventListener('change', function() {
+      const value = this.value;
+      if (value === 'all') {
+        renderTable(allData);
+        renderChart(allData);
+      } else {
+        const filtered = allData.filter(k => k.klasifikasi === value);
+        renderTable(filtered);
+        renderChart(filtered);
+      }
+    });
+
+    loadKeluhan();
+  </script>
+</body>
+</html>

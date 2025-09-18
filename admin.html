@@ -66,7 +66,7 @@
   <script>
     const SUPABASE_URL = "https://gvfidfyrzrjxxmsdgxmw.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2ZmlkZnlyenJqeHhtc2RneG13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxNjg4MDcsImV4cCI6MjA3Mzc0NDgwN30.oCb9nThuh5X_J3Ds8HL-rOIQ_siq_whqjDTjA3eJhos";
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let chart;
     let allData = [];
@@ -158,3 +158,4 @@
   </script>
 </body>
 </html>
+

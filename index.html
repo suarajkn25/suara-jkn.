@@ -30,7 +30,6 @@ footer { margin-top:auto; padding:15px 0; font-size:0.85rem; color:#555; width:1
 .preview-container { margin-top:20px; padding:15px; border:1px solid #ccc; border-radius:8px; background:#f9f9f9;}
 .ticket { font-weight:bold; color:green; margin-bottom:10px; }
 .klasifikasi { font-weight:bold; color:#d32f2f; margin-top:10px; }
-.preview-bukti { margin-top:10px; }
 </style>
 </head>
 <body>
@@ -79,7 +78,6 @@ footer { margin-top:auto; padding:15px 0; font-size:0.85rem; color:#555; width:1
   </label>
   <label>Jika Lainnya, sebutkan:<input type="text" name="klasifikasiLainnya" placeholder="Opsional jika Lainnya" /></label>
   <label>Keluhan:<textarea name="keluhan" required></textarea></label>
-  <label>Upload Bukti:<input type="file" name="bukti" accept="image/*,application/pdf" /></label>
   <button type="submit" id="submitBtn">Kirim Keluhan</button>
 </form>
 
@@ -96,7 +94,6 @@ footer { margin-top:auto; padding:15px 0; font-size:0.85rem; color:#555; width:1
   <p><strong>Keluhan:</strong> <span id="previewKeluhan"></span></p>
   <p class="klasifikasi">Klasifikasi: <span id="previewKlasifikasi"></span></p>
   <p><strong>Lainnya:</strong> <span id="previewKlasifikasiLainnya"></span></p>
-  <div class="preview-bukti" id="previewBukti"></div>
 </div>
 </div>
 
@@ -107,91 +104,74 @@ footer { margin-top:auto; padding:15px 0; font-size:0.85rem; color:#555; width:1
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://gvfidfyrzrjxxmsdgxmw.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2ZmlkZnlyenJqeHhtc2RneG13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxNjg4MDcsImV4cCI6MjA3Mzc0NDgwN30.oCb9nThuh5X_J3Ds8HL-rOIQ_siq_whqjDTjA3eJhos"; // ganti dengan key lo
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2ZmlkZnlyenJqeHhtc2RneG13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxNjg4MDcsImV4cCI6MjA3Mzc0NDgwN30.oCb9nThuh5X_J3Ds8HL-rOIQ_siq_whqjDTjA3eJhos"; // key anon/public
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const form=document.getElementById('keluhanForm');
-const responseMessage=document.getElementById('responseMessage');
-const submitBtn=document.getElementById('submitBtn');
-const previewBox=document.getElementById('preview');
-const ticketNumber=document.getElementById('ticketNumber');
+const form = document.getElementById('keluhanForm');
+const responseMessage = document.getElementById('responseMessage');
+const submitBtn = document.getElementById('submitBtn');
+const previewBox = document.getElementById('preview');
+const ticketNumber = document.getElementById('ticketNumber');
 
-form.addEventListener('submit', async e=>{
+form.addEventListener('submit', async e => {
   e.preventDefault();
 
-  const data={
-    nama:form.nama.value.trim(),
-    nohp:form.nohp.value.trim(),
-    jenisKelamin:form.jenisKelamin.value,
-    lokasiPuskesmas:form.lokasiPuskesmas.value.trim(),
-    tujuanKeluhan:form.tujuanKeluhan.value,
-    keluhan:form.keluhan.value.trim(),
-    klasifikasi:form.klasifikasi.value,
-    klasifikasiLainnya:form.klasifikasiLainnya.value.trim()
+  const data = {
+    nama: form.nama.value.trim(),
+    nohp: form.nohp.value.trim(),
+    jenisKelamin: form.jenisKelamin.value,
+    lokasiPuskesmas: form.lokasiPuskesmas.value.trim(),
+    tujuanKeluhan: form.tujuanKeluhan.value,
+    keluhan: form.keluhan.value.trim(),
+    klasifikasi: form.klasifikasi.value,
+    klasifikasiLainnya: form.klasifikasiLainnya.value.trim()
   };
 
   // === VALIDASI ===
-  if(!data.nama || data.nama.length<3){return showError("Nama minimal 3 huruf!");}
-  if(!/^[0-9]{10,13}$/.test(data.nohp)){return showError("No HP harus 10-13 digit!");}
-  if(!data.jenisKelamin){return showError("Pilih jenis kelamin!");}
-  if(!data.lokasiPuskesmas){return showError("Lokasi wajib diisi!");}
-  if(!data.tujuanKeluhan){return showError("Pilih tujuan keluhan!");}
-  if(!data.klasifikasi){return showError("Pilih klasifikasi!");}
-  if(!data.keluhan){return showError("Keluhan wajib diisi!");}
+  if(!data.nama || data.nama.length<3) return showError("Nama minimal 3 huruf!");
+  if(!/^[0-9]{10,13}$/.test(data.nohp)) return showError("No HP harus 10-13 digit!");
+  if(!data.jenisKelamin) return showError("Pilih jenis kelamin!");
+  if(!data.lokasiPuskesmas) return showError("Lokasi wajib diisi!");
+  if(!data.tujuanKeluhan) return showError("Pilih tujuan keluhan!");
+  if(!data.klasifikasi) return showError("Pilih klasifikasi!");
+  if(!data.keluhan) return showError("Keluhan wajib diisi!");
 
-  const ticket="SJKN-"+Date.now();
-  ticketNumber.textContent="Nomor Tiket: "+ticket;
+  const ticket = "SJKN-" + Date.now();
+  ticketNumber.textContent = "Nomor Tiket: " + ticket;
 
-  document.getElementById('previewNama').textContent=data.nama;
-  document.getElementById('previewNoHP').textContent=data.nohp;
-  document.getElementById('previewJK').textContent=data.jenisKelamin;
-  document.getElementById('previewPuskesmas').textContent=data.lokasiPuskesmas;
-  document.getElementById('previewTujuan').textContent=data.tujuanKeluhan;
-  document.getElementById('previewKeluhan').textContent=data.keluhan;
-  document.getElementById('previewKlasifikasi').textContent=data.klasifikasi;
-  document.getElementById('previewKlasifikasiLainnya').textContent=data.klasifikasiLainnya;
+  document.getElementById('previewNama').textContent = data.nama;
+  document.getElementById('previewNoHP').textContent = data.nohp;
+  document.getElementById('previewJK').textContent = data.jenisKelamin;
+  document.getElementById('previewPuskesmas').textContent = data.lokasiPuskesmas;
+  document.getElementById('previewTujuan').textContent = data.tujuanKeluhan;
+  document.getElementById('previewKeluhan').textContent = data.keluhan;
+  document.getElementById('previewKlasifikasi').textContent = data.klasifikasi;
+  document.getElementById('previewKlasifikasiLainnya').textContent = data.klasifikasiLainnya;
 
-  const fileInput=form.bukti.files[0];
-  const previewBukti=document.getElementById('previewBukti');
-  previewBukti.innerHTML='';
-  let buktiUrl = null;
+  previewBox.style.display = 'block';
+  submitBtn.disabled = true;
+  responseMessage.textContent = 'Mengirim keluhan...';
+  responseMessage.style.color = 'blue';
 
-  if(fileInput){
-    const filePath = `${ticket}/${fileInput.name}`;
-    const { data: uploadData, error: uploadError } = await client.storage
-      .from("bukti_keluhan")
-      .upload(filePath, fileInput, {upsert:true});
-    if(uploadError) return showError("Gagal upload bukti: "+uploadError.message);
+  try {
+    const { error: insertError } = await client.from('keluhan').insert([{...data, ticket}]);
+    if(insertError) return showError("Gagal simpan data: " + insertError.message);
 
-    const { data: publicUrlData } = client.storage.from("bukti_keluhan").getPublicUrl(filePath);
-    buktiUrl = publicUrlData.publicUrl;
-  }
-
-  previewBox.style.display='block';
-  submitBtn.disabled=true;
-  responseMessage.textContent='Mengirim keluhan...';
-  responseMessage.style.color='blue';
-
-  try{
-    const { error: insertError } = await client.from('keluhan').insert([{...data, ticket, bukti: buktiUrl}]);
-    if(insertError) return showError("Gagal simpan data: "+insertError.message);
-
-    responseMessage.textContent='Keluhan berhasil dikirim. Nomor tiket: '+ticket;
-    responseMessage.style.color='green';
+    responseMessage.textContent = 'Keluhan berhasil dikirim. Nomor tiket: ' + ticket;
+    responseMessage.style.color = 'green';
     form.reset();
-  }catch(err){
-    showError("Error: "+err.message);
-  }finally{
-    submitBtn.disabled=false;
+  } catch(err) {
+    showError("Error: " + err.message);
+  } finally {
+    submitBtn.disabled = false;
   }
 });
 
 function showError(msg){
-  responseMessage.textContent=msg;
-  responseMessage.style.color='red';
+  responseMessage.textContent = msg;
+  responseMessage.style.color = 'red';
 }
 </script>
 
 </body>
 </html>
-

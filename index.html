@@ -123,7 +123,7 @@ form.addEventListener('submit', async e => {
     lokasi_puskesmas: form.lokasiPuskesmas.value.trim(),
     tujuan_keluhan: form.tujuanKeluhan.value,
     keluhan: form.keluhan.value.trim(),
-    klasifikasi: form.klasifikasi.value,
+    klasifikasi_keluhan: form.klasifikasi.value,
     klasifikasi_lainnya: form.klasifikasiLainnya.value.trim()
   };
 
@@ -133,7 +133,7 @@ form.addEventListener('submit', async e => {
   if(!data.jenis_kelamin) return showError("Pilih jenis kelamin!");
   if(!data.lokasi_puskesmas) return showError("Lokasi wajib diisi!");
   if(!data.tujuan_keluhan) return showError("Pilih tujuan keluhan!");
-  if(!data.klasifikasi) return showError("Pilih klasifikasi!");
+  if(!data.klasifikasi_keluhan) return showError("Pilih klasifikasi!");
   if(!data.keluhan) return showError("Keluhan wajib diisi!");
 
   const ticket = "SJKN-" + Date.now();
@@ -176,4 +176,5 @@ function showError(msg){
 
 </body>
 </html>
+
 

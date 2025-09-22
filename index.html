@@ -76,7 +76,6 @@ footer { margin-top:auto; padding:15px 0; font-size:0.85rem; color:#555; width:1
     </select>
   </label>
   <label>Keluhan:<textarea name="keluhan" required></textarea></label>
-  <label>Tanggal:<input type="text" name="tanggal" id="tanggal" readonly /></label>
   <button type="submit" id="submitBtn">Kirim Keluhan</button>
 </form>
 
@@ -91,7 +90,6 @@ footer { margin-top:auto; padding:15px 0; font-size:0.85rem; color:#555; width:1
   <p><strong>Lokasi Puskesmas:</strong> <span id="previewPuskesmas"></span></p>
   <p><strong>Tujuan:</strong> <span id="previewTujuan"></span></p>
   <p><strong>Keluhan:</strong> <span id="previewKeluhan"></span></p>
-  <p><strong>Tanggal:</strong> <span id="previewTanggal"></span></p>
   <p class="klasifikasi">Klasifikasi: <span id="previewKlasifikasi"></span></p>
 </div>
 </div>
@@ -103,7 +101,7 @@ footer { margin-top:auto; padding:15px 0; font-size:0.85rem; color:#555; width:1
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://gvfidfyrzrjxxmsdgxmw.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2ZmlkZnlyenJqeHhtc2RneG13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxNjg4MDcsImV4cCI6MjA3Mzc0NDgwN30.oCb9nThuh5X_J3Ds8HL-rOIQ_siq_whqjDTjA3eJhos"; 
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2ZmlkZnlyenJqeHhtc2RneG13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxNjg4MDcsImV4cCI6MjA3Mzc0NDgwN30.oCb9nThuh5X_J3Ds8HL-rOIQ_siq_whqjDTjA3eJhos"; // ganti dengan key anon/public kalian
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const form = document.getElementById('keluhanForm');
@@ -111,11 +109,6 @@ const responseMessage = document.getElementById('responseMessage');
 const submitBtn = document.getElementById('submitBtn');
 const previewBox = document.getElementById('preview');
 const ticketNumber = document.getElementById('ticketNumber');
-
-// isi tanggal otomatis
-const today = new Date();
-const formatted = today.toISOString().slice(0,19).replace("T"," ");
-document.getElementById("tanggal").value = formatted;
 
 form.addEventListener('submit', async e => {
   e.preventDefault();
@@ -127,8 +120,7 @@ form.addEventListener('submit', async e => {
     lokasi_puskesmas: form.lokasiPuskesmas.value.trim(),
     tujuan_keluhan: form.tujuanKeluhan.value,
     keluhan: form.keluhan.value.trim(),
-    klasifikasi_keluhan: form.klasifikasi.value,
-    tanggal: form.tanggal.value
+    klasifikasi_keluhan: form.klasifikasi.value
   };
 
   // VALIDASI
@@ -150,7 +142,6 @@ form.addEventListener('submit', async e => {
   document.getElementById('previewPuskesmas').textContent = data.lokasi_puskesmas;
   document.getElementById('previewTujuan').textContent = data.tujuan_keluhan;
   document.getElementById('previewKeluhan').textContent = data.keluhan;
-  document.getElementById('previewTanggal').textContent = data.tanggal;
   document.getElementById('previewKlasifikasi').textContent = data.klasifikasi_keluhan;
 
   previewBox.style.display = 'block';
@@ -165,7 +156,6 @@ form.addEventListener('submit', async e => {
     responseMessage.textContent = 'Keluhan berhasil dikirim. Nomor tiket: ' + ticket;
     responseMessage.style.color = 'green';
     form.reset();
-    document.getElementById("tanggal").value = formatted; // isi ulang tanggal setelah reset
   } catch(err) {
     showError("Error: " + err.message);
   } finally {

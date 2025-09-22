@@ -48,6 +48,7 @@
   <table>
     <thead>
       <tr>
+        <th>Tanggal</th>
         <th>Nama</th>
         <th>No HP</th>
         <th>Jenis Kelamin</th>
@@ -55,7 +56,6 @@
         <th>Tujuan</th>
         <th>Keluhan</th>
         <th>Klasifikasi</th>
-        <th>Tanggal</th> <!-- tambahan -->
         <th>Status</th>
         <th>Tiket</th>
         <th>Bukti</th>
@@ -68,7 +68,7 @@
   <script>
     // Supabase client
     const SUPABASE_URL = "https://gvfidfyrzrjxxmsdgxmw.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2ZmlkZnlyenJqeHhtc2RneG13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxNjg4MDcsImV4cCI6MjA3Mzc0NDgwN30.oCb9nThuh5X_J3Ds8HL-rOIQ_siq_whqjDTjA3eJhos"; // ganti dengan anon key lo
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2ZmlkZnlyenJqeHhtc2RneG13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxNjg4MDcsImV4cCI6MjA3Mzc0NDgwN30.oCb9nThuh5X_J3Ds8HL-rOIQ_siq_whqjDTjA3eJhos"; 
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let chart;
@@ -90,6 +90,14 @@
       renderChart(data);
     }
 
+    function formatTanggal(tgl) {
+      const d = new Date(tgl);
+      return d.toLocaleDateString("id-ID", {
+        day: "2-digit", month: "2-digit", year: "numeric",
+        hour: "2-digit", minute: "2-digit"
+      });
+    }
+
     function renderTable(data) {
       const tbody = document.getElementById("keluhanTable");
       tbody.innerHTML = "";
@@ -101,6 +109,7 @@
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
+          <td>${formatTanggal(k.created_at)}</td>
           <td>${k.nama}</td>
           <td>${k.no_hp}</td>
           <td>${k.jenis_kelamin}</td>
@@ -108,7 +117,6 @@
           <td>${k.tujuan_keluhan}</td>
           <td>${k.keluhan}</td>
           <td>${k.klasifikasi_keluhan}</td>
-          <td>${k.tanggal || "-"}</td> <!-- tambahan -->
           <td>
             <select onchange="updateStatus('${k.id}', this.value)">
               <option value="menunggu" ${k.status === 'menunggu' ? 'selected' : ''}>Menunggu</option>

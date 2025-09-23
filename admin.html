@@ -101,10 +101,6 @@
       tbody.innerHTML = "";
 
       data.forEach(k => {
-        const buktiCell = k.bukti 
-          ? `<a href="${k.bukti}" target="_blank">Lihat</a>` 
-          : "Tidak ada";
-
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${formatTanggal(k.created_at)}</td>
@@ -115,15 +111,7 @@
           <td>${k.tujuan_keluhan}</td>
           <td>${k.keluhan}</td>
           <td>${k.klasifikasi_keluhan}</td>
-          <td>
-            <select onchange="updateStatus('${k.id}', this.value)">
-              <option value="menunggu" ${k.status === 'menunggu' ? 'selected' : ''}>Menunggu</option>
-              <option value="proses" ${k.status === 'proses' ? 'selected' : ''}>Proses</option>
-              <option value="selesai" ${k.status === 'selesai' ? 'selected' : ''}>Selesai</option>
-            </select>
-          </td>
           <td>${k.ticket || "-"}</td>
-          <td>${buktiCell}</td>
           <td><button onclick="hapusKeluhan('${k.id}')">Hapus</button></td>
         `;
         tbody.appendChild(tr);
@@ -160,11 +148,6 @@
       });
     }
 
-    async function updateStatus(id, status) {
-      await client.from("keluhan").update({ status }).eq("id", id);
-      loadKeluhan();
-    }
-
     async function hapusKeluhan(id) {
       await client.from("keluhan").delete().eq("id", id);
       loadKeluhan();
@@ -186,4 +169,3 @@
   </script>
 </body>
 </html>
-
